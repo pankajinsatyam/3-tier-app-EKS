@@ -35,4 +35,50 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
- 
+  # Job 2: Deploy Terraform to AWS
+  deploy:
+    name: Terraform Deploy
+    runs-on: ubuntu-latest
+
+    needs: validate
+
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    environment: production
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      TF_IN_AUTOMATION: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Authenticate with AWS using OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: 'us-east-1a'
+
+      # Verify AWS authentication
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
+
+      # Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+
+      # Generate execution plan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # Apply Terraform changes
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
