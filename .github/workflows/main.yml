@@ -22,11 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::571879379556:role/github-actions-terraform
-          aws-region: us-east-1
       - name: Show OIDC token details
         uses: actions/github-script@v7
         with:
@@ -35,6 +30,11 @@ jobs:
             const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
             console.log('sub:', payload.sub);
             console.log('aud:', payload.aud);
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::571879379556:role/github-actions-terraform
+          aws-region: us-east-1
+
       - uses: hashicorp/setup-terraform@v3
 
       - run: terraform init
