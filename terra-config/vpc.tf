@@ -1,3 +1,7 @@
+locals {
+  cluster_name = "Three-tier-cloud"
+  azs          = ["us-east-1a", "us-east-1b"]
+}
 # 1. The VPC (your own private network)
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
